@@ -1,6 +1,6 @@
 # 🍅 Tomato Disease Detection
 
-Deep learning pipeline for classifying tomato leaf diseases using the PlantVillage dataset. Compares a custom CNN baseline against a fine-tuned EfficientNet-B0, with Grad-CAM explainability and a Streamlit inference app.
+PyTorch-based deep learning pipeline for classifying tomato leaf diseases using the PlantVillage dataset. Compares a custom CNN baseline against a fine-tuned EfficientNet-B0, with Grad-CAM explainability and a Streamlit inference app.
 
 > Trained on 10 Tomato Disease Classes from [PlantVillage dataset](https://www.kaggle.com/datasets/abdallahalidev/plantvillage-dataset)
 
@@ -35,6 +35,8 @@ source .venv/bin/activate
 ```
 
 3. Install dependencies
+
+- Install PyTorch (choose your CUDA version at https://pytorch.org/get-started/locally/)
 
 ```
 pip install -r requirements.txt
