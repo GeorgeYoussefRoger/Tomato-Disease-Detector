@@ -1,9 +1,9 @@
-grad-cam==1.5.5
+fastapi==0.139.2
 mlflow==3.11.1
 numpy==2.4.4
-opencv-python==4.13.0.92
+pillow==12.2.0
 scikit-learn==1.8.0
 streamlit==1.57.0
-# Install PyTorch separately: https://pytorch.org/get-started/locally/
 # torch==2.11.0+cu126
 # torchvision==0.26.0+cu126
+uvicorn==0.51.0

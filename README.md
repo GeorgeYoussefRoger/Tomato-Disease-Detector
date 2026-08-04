@@ -1,16 +1,15 @@
 # 🍅 Tomato Disease Detection
 
-PyTorch-based deep learning pipeline for classifying tomato leaf diseases using the PlantVillage dataset. Compares a custom CNN baseline against a fine-tuned EfficientNet-B0, with Grad-CAM explainability and a Streamlit inference app.
+An end-to-end Deep Learning Project that detects tomato leaf diseases with a PyTorch CNN and deployment through a FastAPI backend and Streamlit interface.
 
 > Trained on 10 Tomato Disease Classes from [PlantVillage dataset](https://www.kaggle.com/datasets/abdallahalidev/plantvillage-dataset)
 
 ## 🚀 Features
 
-- Custom CNN baseline trained from scratch
-- Two-phase EfficientNet-B0 fine-tuning (frozen backbone -> full fine-tune)
-- Grad-CAM heatmaps for prediction explainability
-- Experiment tracking with MLflow
-- Interactive inference app with Streamlit
+- PyTorch custom CNN trained from scratch
+- MLflow experiment tracking
+- FastAPI inference API
+- Streamlit interactive frontend
 
 ## 📦 Installation & Usage
 
@@ -42,13 +41,21 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Run UI
+4. Run API
 
 ```
-streamlit run app.py
+uvicorn api.api:app
 ```
 
-5. Access UI -> http://localhost:8501
+5. Run UI
+
+```
+streamlit run ui/app.py
+```
+
+6. Access:
+   - UI -> http://localhost:8501
+   - API Docs -> http://localhost:8000/docs
 
 ## 🧠 Training
 
@@ -64,40 +71,21 @@ python -m src.main
 mlflow server --backend-store-uri sqlite:///mlruns.db
 ```
 
-## 🤖 Models Details
+## 🤖 Model Details
 
-### Model Architectures
-
-- Baseline CNN
+- Model Architecture
   - 4 Conv Blocks
-  - BatchNorm
-  - MaxPooling
+  - Batch Normalization
+  - Max Pooling
   - Global Average Pooling
   - Dropout
 
-- EfficientNet-B0
-  - ImageNet pretrained
-  - Two-stage fine-tuning
-
-### Model Results
-
-| Model           | Accuracy | Macro F1 |
-| --------------- | -------- | -------- |
-| Baseline CNN    | 95.00%   | 0.93     |
-| EfficientNet-B0 | 99.85%   | 0.99     |
+- Model Results
+  - Accuracy: 95%
+  - Macro F1: 93%
 
 - Note: PlantVillage contains controlled-condition images so real-world field performance may differ.
 
-## 📂 Project Structure
-
-```
-├── src/                # ML Pipeline
-├── app.py              # Streamlit UI
-├── models/             # Saved model weights
-└── requirements.txt
-```
-
 ## 📜 License
 
-- This project is licensed under the MIT License.
-- See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the MIT License.

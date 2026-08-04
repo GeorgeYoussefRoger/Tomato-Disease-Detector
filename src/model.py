@@ -1,11 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision.models as models
-
-from src.config import BASELINE_DROPOUT, EFF_DROPOUT
 
 class ConvNet(nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, dropout):
         super(ConvNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
         self.bn1 = nn.BatchNorm2d(32) # Batch normalization to stabilize training and improve convergence
@@ -17,7 +14,7 @@ class ConvNet(nn.Module):
         self.bn4 = nn.BatchNorm2d(256)
 
         self.pool = nn.MaxPool2d(2, 2)
-        self.dropout = nn.Dropout(BASELINE_DROPOUT) # Dropout to prevent overfitting
+        self.dropout = nn.Dropout(dropout) # Dropout to prevent overfitting
         self.gap = nn.AdaptiveAvgPool2d((1, 1)) # Global Average Pooling to reduce spatial dimensions to 1x1
 
         self.fc = nn.Linear(256, num_classes)
@@ -32,18 +29,3 @@ class ConvNet(nn.Module):
         x = self.dropout(x)
         x = self.fc(x)
         return x
-
-
-def build_efficientnet(num_classes, freeze_backbone=True):
-    model = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT)
-
-    if freeze_backbone:
-        for param in model.parameters():
-            param.requires_grad = False
-
-    in_features = model.classifier[1].in_features
-    model.classifier = nn.Sequential(
-        nn.Dropout(p=EFF_DROPOUT),
-        nn.Linear(in_features, num_classes)
-    )
-    return model

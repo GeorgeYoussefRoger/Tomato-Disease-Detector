@@ -21,7 +21,7 @@ val_test_transforms = transforms.Compose([
     transforms.Normalize(mean=MEAN, std=STD),
 ])
 
-def get_dataloaders():
+def create_dataloaders():
     train_dataset = datasets.ImageFolder(DATA_DIR, transform=train_transforms)
     val_test_dataset = datasets.ImageFolder(DATA_DIR, transform=val_test_transforms)
     indices = np.arange(len(train_dataset.samples))

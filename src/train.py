@@ -1,19 +1,23 @@
 import torch
 import mlflow
-from copy import deepcopy
-from sklearn.metrics import accuracy_score, f1_score
+import os
+from tqdm import tqdm
 
-def train(model, train_loader, val_loader, criterion, optimizer, num_epochs, patience, device, name):
+from src.config import MODELS_DIR
+
+def train(model, train_loader, val_loader, criterion, optimizer, epochs, patience, device):
+    os.makedirs(MODELS_DIR, exist_ok=True)
+    best_model_path = os.path.join(MODELS_DIR, "best_model.pth")
     best_val_loss = float("inf")
     patience_counter = 0
-    best_state = None
 
-    print(f"\nStarted Training: {name}")
-    for epoch in range(num_epochs):
+    for epoch in range(epochs):
         # Training
         model.train()
-        train_loss, train_correct, train_total = 0.0, 0, 0
-        for images, labels in train_loader:
+        train_loss = 0.0
+
+        train_pbar = tqdm(train_loader, desc=f"Train Epoch {epoch+1}/{epochs}")
+        for images, labels in train_pbar:
             images = images.to(device)
             labels = labels.to(device)
             optimizer.zero_grad()
@@ -26,42 +30,38 @@ def train(model, train_loader, val_loader, criterion, optimizer, num_epochs, pat
             loss.backward()
             optimizer.step()
 
-            train_loss += loss.item() * images.size(0)
-            train_correct += (outputs.argmax(1) == labels).sum().item()
-            train_total += labels.size(0)
+            train_loss += loss.item()
+            train_pbar.set_postfix(loss=f"{loss.item():.4f}")
+
+        avg_train_loss = train_loss / len(train_loader)
 
         # Validation
         model.eval()
-        val_loss, val_correct, val_total = 0.0, 0, 0
+        val_loss = 0.0
+
+        val_pbar = tqdm(val_loader, desc=f"Val Epoch {epoch+1}/{epochs}")
         with torch.no_grad():
-            for images, labels in val_loader:
+            for images, labels in val_pbar:
                 images = images.to(device)
                 labels = labels.to(device)
 
                 outputs  = model(images)
                 loss = criterion(outputs, labels)
 
-                val_loss += loss.item() * images.size(0)
-                val_correct += (outputs.argmax(1) == labels).sum().item()
-                val_total += labels.size(0)
+                val_loss += loss.item()
+                val_pbar.set_postfix(loss=f"{loss.item():.4f}")
 
-        train_loss /= train_total 
-        val_loss /= val_total
-        train_acc = train_correct / train_total
-        val_acc = val_correct / val_total
+        avg_val_loss = val_loss / len(val_loader)
 
         mlflow.log_metrics({
-            f"{name}/train_loss": train_loss,
-            f"{name}/val_loss": val_loss,
-            f"{name}/train_acc": train_acc,
-            f"{name}/val_acc": val_acc,
+            "train_loss": avg_train_loss,
+            "val_loss": avg_val_loss,
         }, step=epoch)
 
-        print(f"Epoch [{epoch+1}/{num_epochs}] | Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} | Val Loss: {val_loss:.4f} Acc: {val_acc:.4f}")
-
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_state = deepcopy(model.state_dict())
+        # Early stopping
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            torch.save(model.state_dict(), best_model_path)
             patience_counter = 0
         else:
             patience_counter += 1
@@ -69,19 +69,5 @@ def train(model, train_loader, val_loader, criterion, optimizer, num_epochs, pat
                 print(f"Early stopping at epoch {epoch+1}.")
                 break
 
-    model.load_state_dict(best_state)
+    model.load_state_dict(torch.load(best_model_path))
     return model
-
-
-def evaluate(model, test_loader, device):
-    model.eval()
-    all_preds, all_labels = [], []
-    with torch.no_grad():
-        for images, labels in test_loader:
-            out = model(images.to(device))
-            all_preds.extend(out.argmax(1).cpu().numpy())
-            all_labels.extend(labels.numpy())
-
-    acc = accuracy_score(all_labels, all_preds)
-    macro_f1 = f1_score(all_labels, all_preds, average="macro")
-    return acc, macro_f1

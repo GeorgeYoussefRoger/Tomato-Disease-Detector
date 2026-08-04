@@ -3,6 +3,12 @@ MODELS_DIR = "models"
 MLFLOW_TRACKING_URI = "sqlite:///mlruns.db"
 MLFLOW_EXPERIMENT = "Tomato-Disease-Classification"
 
+CLASS_NAMES = [
+    "Bacterial Spot", "Early Blight", "Late Blight",
+    "Leaf Mold", "Septoria Leaf Spot", "Spider Mites", 
+    "Target Spot", "Yellow Leaf Curl Virus", "Mosaic Virus", "Healthy"
+]
+
 IMAGE_SIZE = 224
 MEAN = [0.485, 0.456, 0.406]
 STD = [0.229, 0.224, 0.225]
@@ -11,16 +17,7 @@ TEST_SIZE = 0.15
 VAL_SIZE = 0.15
 BATCH_SIZE = 32
 
-BASELINE_LR = 0.001
-BASELINE_EPOCHS = 20
-BASELINE_PATIENCE = 5
-BASELINE_DROPOUT = 0.5
-
-EFF_HEAD_LR = 0.001
-EFF_HEAD_EPOCHS = 10
-EFF_HEAD_PATIENCE = 3
-EFF_DROPOUT = 0.3
-
-EFF_FULL_LR = 0.0001
-EFF_FULL_EPOCHS = 20
-EFF_FULL_PATIENCE = 5
+LEARNING_RATE = 0.001
+EPOCHS = 20
+PATIENCE = 5
+DROPOUT = 0.5
